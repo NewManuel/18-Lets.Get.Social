@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const schema = require('./schema');
-
 const thoughtSchema = new mongoose.Schema({
     thoughtText: {
         type: String,
@@ -16,7 +15,8 @@ const thoughtSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    reactions: [schema], // Embed Reaction schema as an array of subdocuments
+    // Embed Reaction schema as an array of subdocuments
+    reactions: [schema], 
 });
 
 const Thought = mongoose.model('Thought', thoughtSchema);
