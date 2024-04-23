@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const schema = require('./schema');
 
-// Define Thought schema
 const thoughtSchema = new mongoose.Schema({
     thoughtText: {
         type: String,
@@ -20,7 +19,6 @@ const thoughtSchema = new mongoose.Schema({
     reactions: [schema], // Embed Reaction schema as an array of subdocuments
 });
 
-// Create Thought model
-const thought = mongoose.model('Thought', thoughtSchema);
+const Thought = mongoose.model('Thought', thoughtSchema);
 
-module.exports = thought;
+module.exports = Thought;
