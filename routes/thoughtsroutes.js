@@ -1,36 +1,32 @@
-const router = require('express').Router();
-const Thought = require('../models/Thought');
-const User = require('../models/User');
+const { Router } = require('express');
 const Joi = require('joi');
-
+const { Thought, User } = require('../models');
+const router = Router();
 const thoughtSchema = Joi.object({
     thoughtText: Joi.string().required(),
     username: Joi.string().required(),
     userId: Joi.string().required(),
 });
-
-function validateThought(req, res, next) {
-    const { error } = thoughtSchema.validate(req.body);
-    if (error) {
-        return res.status(400).json({ message: error.details[0].message });
+const handleRequest = async (req, res, fn) => {
+    try {
+        await fn(req, res);
+    } catch (err) {
+        console.error(`${req.method} ${req.originalUrl} - Error:`, err);
+        res.status(500).json(err);
     }
-    next();
-}
+};
 
 router.get('/', async (req, res) => {
-    try {
+    await handleRequest(req, res, async () => {
         console.log("GET /api/thoughts - Fetching all thoughts");
         const thoughts = await Thought.find().populate('reactions');
         console.log("GET /api/thoughts - Thoughts fetched successfully");
         res.json(thoughts);
-    } catch (err) {
-        console.error("GET /api/thoughts - Error:", err);
-        res.status(500).json(err);
-    }
+    });
 });
 
 router.get('/:thoughtId', async (req, res) => {
-    try {
+    await handleRequest(req, res, async () => {
         console.log(`GET /api/thoughts/${req.params.thoughtId} - Fetching thought by id: ${req.params.thoughtId}`);
         const thought = await Thought.findById(req.params.thoughtId).populate('reactions');
         console.log(`GET /api/thoughts/${req.params.thoughtId} - Thought fetched successfully`);
@@ -39,18 +35,14 @@ router.get('/:thoughtId', async (req, res) => {
             return;
         }
         res.json(thought);
-    } catch (err) {
-        console.error(`GET /api/thoughts/${req.params.thoughtId} - Error:`, err);
-        res.status(500).json(err);
-    }
+    });
 });
 
-router.post('/', validateThought, async (req, res) => {
-    try {
+router.post('/', async (req, res) => {
+    await handleRequest(req, res, async () => {
         console.log("POST /api/thoughts - Creating a new thought");
         const thought = await Thought.create(req.body);
         console.log("POST /api/thoughts - Thought created successfully");
-        // Push the created thought's _id to the associated user's thoughts array field
         const user = await User.findByIdAndUpdate(
             req.body.userId,
             { $push: { thoughts: thought._id } },
@@ -61,14 +53,11 @@ router.post('/', validateThought, async (req, res) => {
             return;
         }
         res.status(201).json(thought);
-    } catch (err) {
-        console.error("POST /api/thoughts - Error:", err);
-        res.status(400).json(err);
-    }
+    });
 });
 
 router.put('/:thoughtId', async (req, res) => {
-    try {
+    await handleRequest(req, res, async () => {
         console.log(`PUT /api/thoughts/${req.params.thoughtId} - Updating thought by id: ${req.params.thoughtId}`);
         const updatedThought = await Thought.findByIdAndUpdate(
             req.params.thoughtId,
@@ -81,14 +70,11 @@ router.put('/:thoughtId', async (req, res) => {
             return;
         }
         res.json(updatedThought);
-    } catch (err) {
-        console.error(`PUT /api/thoughts/${req.params.thoughtId} - Error:`, err);
-        res.status(400).json(err);
-    }
+    });
 });
 
 router.delete('/:thoughtId', async (req, res) => {
-    try {
+    await handleRequest(req, res, async () => {
         console.log(`DELETE /api/thoughts/${req.params.thoughtId} - Deleting thought by id: ${req.params.thoughtId}`);
         const deletedThought = await Thought.findByIdAndDelete(req.params.thoughtId);
         console.log(`DELETE /api/thoughts/${req.params.thoughtId} - Thought deleted successfully`);
@@ -97,14 +83,11 @@ router.delete('/:thoughtId', async (req, res) => {
             return;
         }
         res.json(deletedThought);
-    } catch (err) {
-        console.error(`DELETE /api/thoughts/${req.params.thoughtId} - Error:`, err);
-        res.status(500).json(err);
-    }
+    });
 });
 
 router.post('/:thoughtId/reactions', async (req, res) => {
-    try {
+    await handleRequest(req, res, async () => {
         console.log(`POST /api/thoughts/${req.params.thoughtId}/reactions - Adding reaction to thought id: ${req.params.thoughtId}`);
         const thought = await Thought.findById(req.params.thoughtId);
         if (!thought) {
@@ -115,14 +98,11 @@ router.post('/:thoughtId/reactions', async (req, res) => {
         const updatedThought = await thought.save();
         console.log(`POST /api/thoughts/${req.params.thoughtId}/reactions - Reaction added successfully`);
         res.status(201).json(updatedThought);
-    } catch (err) {
-        console.error(`POST /api/thoughts/${req.params.thoughtId}/reactions - Error:`, err);
-        res.status(400).json(err);
-    }
+    });
 });
 
 router.delete('/:thoughtId/reactions/:reactionId', async (req, res) => {
-    try {
+    await handleRequest(req, res, async () => {
         console.log(`DELETE /api/thoughts/${req.params.thoughtId}/reactions/${req.params.reactionId} - Removing reaction with id: ${req.params.reactionId}`);
         const thought = await Thought.findById(req.params.thoughtId);
         if (!thought) {
@@ -133,13 +113,9 @@ router.delete('/:thoughtId/reactions/:reactionId', async (req, res) => {
             reaction => reaction.reactionId.toString() !== req.params.reactionId
         );
         const updatedThought = await thought.save();
-        console.log(`DELETE /api/thoughts/${req.params.thoughtId}/
-    reactions/${req.params.reactionId} - Reaction removed successfully`);
+        console.log(`DELETE /api/thoughts/${req.params.thoughtId}/reactions/${req.params.reactionId} - Reaction removed successfully`);
         res.json(updatedThought);
-    } catch (err) {
-        console.error(`DELETE /api/thoughts/${req.params.thoughtId}/reactions/${req.params.reactionId} - Error:`, err);
-        res.status(500).json(err);
-    }
+    });
 });
 
 module.exports = router;
