@@ -276,7 +276,7 @@ You are required to submit BOTH of the following for review:
 
 * A walkthrough video demonstrating the functionality of the application and all of the acceptance criteria being met.
 
-* The URL of the GitHub repository. Give the repository a unique name and include a README describing the project.
+* The URL of the GitHub repository: https://github.com/NewManuel/18-Lets.Get.Social
 
 ---
 © 2024 edX Boot Camps LLC. Confidential and Proprietary. All Rights Reserved.
