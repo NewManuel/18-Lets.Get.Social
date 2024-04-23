@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-
 const schema = new mongoose.Schema({
-    reactionId: mongoose.Schema.Types.ObjectId,
     reactionBody: {
         type: String,
         required: true,
@@ -13,8 +11,11 @@ const schema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now,
-        get: createdAtVal => new Date(createdAtVal).toISOString()
+        default: Date.now
+    }
+}, {
+    toJSON: {
+        getters: true
     }
 });
 
