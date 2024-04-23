@@ -9,20 +9,12 @@ const PORT = process.env.PORT || 3005;
 
 app.use(express.json());
 
-mongoose.connect('mongodb://localhost/social_network_db', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-    .then(() => {
-        console.log('MongoDB connected');
-    })
-    .catch((err) => {
-        console.error('MongoDB connection error:', err);
-    });
+mongoose.connect('mongodb://localhost/social_network_db', { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('MongoDB connected'))
+    .catch((err) => console.error('MongoDB connection error:', err));
 
 app.use('/api/users', userRoutes);
 app.use('/api/thoughts', thoughtRoutes);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+
